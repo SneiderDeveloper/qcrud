@@ -10,17 +10,19 @@
     <dynamic-field v-model="dataCrudSelect.itemSelected" :field="selectField" v-if="showType('select')"
                    @update:modelValue="emitValue" @click.native="showEventListener">
       <!--Before options slot-->
-      <div slot="before-options">
-        <q-btn class="btnCreateCrud full-width" flat icon="fas fa-plus" color="green" no-caps
-               :label="`${paramsProps.create.title || ''}`" v-if="params.create" />
-      </div>
+      <template v-slot:before-options>
+        <div>
+          <q-btn class="btnCreateCrud full-width" flat icon="fas fa-plus" color="green" no-caps
+                :label="`${paramsProps.create.title || ''}`" v-if="params.create" />
+        </div>
+      </template>
     </dynamic-field>
 
     <!--=== Full Crud ===-->
     <div v-if="success">
       <!--Index component-->
       <crud-index v-if="showType('full')" :params="$clone(paramsProps)" ref="crudIndex"
-                  @create="create" @update="update" :title="title" />
+                  @create="create" @update="update" @deleted="formEmmit('deleted')" :title="title" />
       <!--Modal create/update component-->
       <crud-form v-model="showModal" v-show="(params.create || params.update) && showModal"
                  :params="paramsProps" :item-id="itemIdToEdit" :field="fieldData"
@@ -86,7 +88,7 @@ export default {
     },
     title: { defualt: false }
   },
-  emits: ['update:modelValue','deleted','created','updated'],
+  emits: ['update:modelValue','deleted','created','updated', 'createdData'],
   // Dependency injection
   provide() {
     return {
@@ -225,7 +227,7 @@ export default {
 
       //Response
       return crudData;
-    },    
+    },
     //select field props
     selectField() {
       let params = this.$clone(this.paramsProps);
@@ -472,7 +474,6 @@ export default {
     },
     //Emit value
     emitValue() {
-      console.count('emit')
       this.$emit('update:modelValue', this.dataCrudSelect.itemSelected);
     },
   }
